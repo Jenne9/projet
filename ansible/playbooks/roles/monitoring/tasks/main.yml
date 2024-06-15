@@ -1,0 +1,73 @@
+---
+    - name: Copy values.yaml 
+      copy:
+        src: /Users/macbookpro/Desktop/projet/ansible/playbooks/roles/monitoring/files/values.yaml
+        dest: /tmp/values.yaml
+      tags: helm
+
+    - name: Add Prometheus chart repository
+      kubernetes.core.helm_repository:
+        name: prometheus-community
+        repo_url: "https://prometheus-community.github.io/helm-charts"
+
+    - name: Create namespace and install release
+      kubernetes.core.helm:
+        name: prom
+        chart_ref: prometheus-community/kube-prometheus-stack
+        update_repo_cache: true
+        release_namespace: monitoring
+        create_namespace: true
+        values_files: 
+          -  /tmp/values.yaml
+      
+    - name: Create a service Monitor
+      tags: sm
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: monitoring.coreos.com/v1
+          kind: ServiceMonitor
+          metadata:
+            name: opencti-service-monitor
+            namespace: monitoring
+            labels:
+              release: prom
+          spec:
+            selector:
+              matchLabels:
+                app: opencti
+            namespaceSelector:
+              matchNames:
+              - opencti
+            endpoints:
+            - port: http
+              interval: 30s
+              path: /metrics
+
+    - name: Create a ConfigMap for Alertmanager
+      tags: cm
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: alertmanager-config
+            namespace: monitoring
+          data:
+            alertmanager.yaml: |
+              global:
+                slack_api_url: 'https://hooks.slack.com/services/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'
+              receivers:
+                - name: 'slack'
+                - name: default-receiver
+                  slack_configs:
+                    - channel: '#general'
+                      send_resolved: true
+              route:
+                receiver: default-receiver
+                repeat_interval: 3h
+                routes:
+                  - match:
+                      severity: warning
+                    receiver: 'default-receiver'

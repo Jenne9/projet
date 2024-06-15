@@ -1,0 +1,18 @@
+aws_access_key: AKIA2UC3CKSK7G2FEJLP
+aws_secret_key: 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
+role_arn: arn:aws:iam::730335433877:role/testeks
+region: eu-west-3
+cluster_name: opencti-cluster
+security_group_id: sg-010848faf8c3a4b50
+node_role: arn:aws:iam::730335433877:role/jenneEks
+vpc_cidr: "10.0.0.0/16"
+
+subnets:
+  - cidr: "10.0.1.0/24"
+    az: "{{ region }}a"
+  - cidr: "10.0.2.0/24"
+    az: "{{ region }}b"
+
+zone: "Z09532671N40UNRYKTHLF"
+zone_name: "opencti-oclock.com" 
+eks_cluster_endpoint: af81d351c97964e5d8e8f443f68c59f5-375475019.eu-west-3.elb.amazonaws.com

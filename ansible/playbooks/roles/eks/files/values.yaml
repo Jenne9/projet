@@ -1,0 +1,529 @@
+# -- Global configuration
+global:
+  imageRegistry: ""
+  # E.g.
+  # imagePullSecrets:
+  #   - name: myRegistryKeySecretName
+  #
+  imagePullSecrets: []
+
+# -- Number of replicas
+replicaCount: 1
+
+# -- Image registry
+image:
+  repository: opencti/platform
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+# -- String to partially override opencti.fullname template (will maintain the release name)
+nameOverride: ""
+
+# -- String to fully override opencti.fullname template
+fullnameOverride: "opencti"
+
+
+
+# -- Global Docker registry secret names as an array
+imagePullSecrets: []
+
+# -- Enable creation of ServiceAccount
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+  # Specifies if you don't want the kubelet to automatically mount
+  # a ServiceAccount's API credentials
+  automountServiceAccountToken: false
+
+# -- Environment variables to configure application
+# ref: https://docs.opencti.io/5.12.X/deployment/configuration/#platform
+env:
+  # Plain vars
+  # foo: bar
+  # my_env: my_value
+  # APP OPENCTI
+  APP__ADMIN__EMAIL: admin@opencti.io
+  APP__ADMIN__PASSWORD: 4546A5FD-8466-4312-94FA-A733FFFCDEC4
+  APP__ADMIN__TOKEN: b1976749-8a53-4f49-bf04-cafa2a3458c1
+  APP__BASE_PATH: "/"
+  MINIO__ENDPOINT: opencti-minio
+  ELASTICSEARCH__URL: http://opencti-elasticsearch:9200
+  ELASTICSEARCH__ENGINE_SELECTOR: auto
+  RABBITMQ__HOSTNAME: opencti-rabbitmq
+  RABBITMQ__PORT_MANAGEMENT: 15672
+  RABBITMQ__PORT: 5672
+  RABBITMQ__USERNAME: user
+  RABBITMQ__PASSWORD: ChangeMe
+  REDIS__HOSTNAME: opencti-redis-master
+  REDIS__PORT: 6379
+  REDIS__MODE: single
+
+
+testConnection: false
+# -- Secrets from variables
+envFromSecrets: {}
+  # Cipher vars
+  # my_env:
+  #  name: release-name-credentials
+  #  key: secret_key
+
+# -- Secrets values to create credencials and reference by envFromSecrets
+secrets: {}
+
+# -- Kubernetes servide to expose Pod
+service:
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "4000"
+  # -- Kubernetes Service type. Allowed values: NodePort, LoadBalancer or ClusterIP
+  type: LoadBalancer
+  # -- Kubernetes Service port
+  port: 80
+  # -- NodePort port (only when type is NodePort)
+  # nodePort: 32000
+  # -- Pod expose port
+  targetPort: 4000
+  # -- Pod extra ports
+  # extraPorts:
+  # - name: metrics
+  #   port: 9080
+  #   targetPort: 9080
+
+# -- Configure liveness checker
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
+livenessProbe:
+  enabled: false
+  failureThreshold: 3
+  initialDelaySeconds: 300
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 5
+
+# -- Custom livenessProbe
+livenessProbeCustom: {}
+  # httpGet:
+  #   path: /dashboard
+  #   port: 4000
+  # failureThreshold: 3
+  # initialDelaySeconds: 200
+  # periodSeconds: 30
+  # successThreshold: 1
+  # timeoutSeconds: 5
+
+# -- Configure readinessProbe checker
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
+readinessProbe:
+  enabled: false
+  failureThreshold: 3
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1
+
+# -- Custom readinessProbe
+readinessProbeCustom: {}
+  # httpGet:
+  #   path: /dashboard
+  #   port: 4000
+  # failureThreshold: 3
+  # initialDelaySeconds: 200
+  # periodSeconds: 30
+  # successThreshold: 1
+  # timeoutSeconds: 5
+
+# -- Configure startupProbe checker
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
+startupProbe:
+  enabled: false
+  failureThreshold: 30
+  initialDelaySeconds: 180
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 5
+
+# -- Custom startupProbe
+startupProbeCustom: {}
+  # httpGet:
+  #   path: /dashboard
+  #   port: 4000
+  # failureThreshold: 3
+  # initialDelaySeconds: 200
+  # periodSeconds: 30
+  # successThreshold: 1
+  # timeoutSeconds: 5
+
+# -- Enable or disable ready-checker
+readyChecker:
+  enabled: true
+  # -- Number of retries before giving up
+  retries: 30
+  # -- Timeout for each check
+  timeout: 5
+  # -- List services
+  services:
+  - name: elasticsearch
+    port: 9200
+  - name: minio
+    port: 9000
+  - name: rabbitmq
+    port: 5672
+  - name: redis-master
+    port: 6379
+
+# -- Ingress configuration to expose app
+ingress:
+  enabled: false
+
+      
+
+
+# -- The resources limits and requested
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: "1500m"
+  #   memory: 2048Mi
+  # requests:
+  #   cpu: 1
+  #   memory: 256Mi
+
+# -- Autoscaling with CPU or memory utilization percentage
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# -- Node labels for pod assignment
+nodeSelector: {}
+
+# -- Tolerations for pod assignment
+tolerations: []
+
+# -- Affinity for pod assignment
+affinity: {}
+
+# -- Connector Global environment
+connectorsGlobalEnv:
+  # Plain vars
+  # foo: bar
+  # my_env: my_value
+
+# -- Connectors
+# ref: https://github.com/OpenCTI-Platform/connectors/tree/master
+connectors:
+- name: export-file-csv
+  enabled: true
+  replicas: 1
+  image: 
+    repository: opencti/connector-export-file-csv
+    tag: "6.0.5"
+  env:
+    CONNECTOR_CONFIDENCE_LEVEL: "15"
+    CONNECTOR_ID: "7ba187fb-fde8-4063-92b5-c3da34060dd7"
+    CONNECTOR_TOKEN: "D218C1BB-9876-4D5D-B9F7-7C0A630901BB"
+    CONNECTOR_NAME: ExportFileCsv
+    CONNECTOR_SCOPE: text/csv
+    CONNECTOR_TYPE: INTERNAL_EXPORT_FILE
+- name: export-file-stix
+  enabled: true
+  replicas: 1
+  image: 
+    repository: opencti/connector-import-file-stix
+    pullPolicy:
+    tag: "6.0.5"
+  env:
+    CONNECTOR_CONFIDENCE_LEVEL: "15"
+    CONNECTOR_ID: "72327164-0b35-482b-b5d6-a5a3f76b845f"
+    CONNECTOR_TOKEN: "448F38CB-8270-4CD2-9C1F-8CCE930B822E"
+    CONNECTOR_LOG_LEVEL: "info"
+    CONNECTOR_NAME: ExportFileStix2
+    CONNECTOR_SCOPE: application/vnd.oasis.stix+json
+    CONNECTOR_TYPE: INTERNAL_EXPORT_FILE
+
+
+  # Plain vars
+#   # foo: bar
+#   # my_env: my_value
+#   # -- Pod annotations
+podAnnotations: {}
+#   # -- Secrets from variables
+#   envFromSecrets: {}
+#     # Cipher vars
+#     # my_env:
+#     #  name: release-name-credentials
+#     #  key: secret_key
+#   # -- The resources limits and requested
+#   resources: {}
+#     limits:
+#       memory: 256Mi
+#       cpu: "250m"
+#     requests:
+#       memory: 56Mi
+#       cpu: "50m"
+#   # -- Node labels for pod assignment
+#   nodeSelector: {}
+#     project: "opencti"
+#   # -- Tolerations for pod assignment
+#   tolerations: []
+#     - key: "project"
+#       operator: "Equal"
+#       value: "opencti"
+#       effect: "NoSchedule"
+#   # -- Affinity for pod assignment
+#   affinity: {}
+
+# -- OpenCTI worker deployment configuration
+worker:
+  enabled: true
+
+  # -- Number of replicas
+  replicaCount: 3
+
+  # -- Enable or disable ready-checker waiting server is ready
+  readyChecker:
+    enabled: true
+    # -- Number of retries before giving up
+    retries: 30
+    # -- Timeout for each check
+    timeout: 5
+
+  # -- Image registry
+  image:
+    repository: opencti/worker
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "6.0.5"
+
+  # -- Environment variables to configure application
+  # ref: https://docs.opencti.io/5.12.X/deployment/configuration/#platform
+  env:
+    # Plain vars
+    # foo: bar
+    # my_env: my_value
+    WORKER_LOG_LEVEL: info
+    APP_WORKER_TOKEN: 21B57971-9B6E-4242-BFAA-D02CC8E6E94F
+    WORKER_TELEMETRY_ENABLED: "true"
+    WORKER_TELEMETRY_PROMETHEUS_PORT: "14270"
+    WORKER_PROMETHEUS_TELEMETRY_HOST: "0.0.0.0"
+  # -- Secrets from variables
+  envFromSecrets: {}
+    # Cipher vars
+    # my_env:
+    #  name: release-name-credentials
+    #  key: secret_key
+
+  # -- The resources limits and requested
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: "250m"
+    #   memory: 256Mi
+    # requests:
+    #   cpu: "100m"
+    #   memory: 56Mi
+
+  # -- Autoscaling with CPU or memory utilization percentage
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # -- Node labels for pod assignment
+  nodeSelector: {}
+
+  # -- Tolerations for pod assignment
+  tolerations: []
+
+  # -- Affinity for pod assignment
+  affinity: {}
+
+# -- OpenSearch subchart deployment
+# ref: https://github.com/opensearch-project/helm-charts/blob/opensearch-2.16.1/charts/opensearch/values.yaml
+opensearch:
+  # -- Enable or disable OpenSearch subchart
+  enabled: false
+
+  # -- OpenSearch Java options
+  opensearchJavaOpts: "-Xmx512M -Xms512M"
+
+  # -- If discovery.type in the opensearch configuration is set to "single-node",
+  # this should be set to "true"
+  # If "true", replicas will be forced to 1
+  singleNode: true
+
+  # -- Enable persistence using Persistent Volume Claims
+  # ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+  persistence:
+    enabled: false
+
+# -- ElasticSearch subchart deployment
+# ref: https://github.com/bitnami/charts/blob/main/bitnami/elasticsearch/values.yaml
+elasticsearch:
+  # -- Enable or disable ElasticSearch subchart
+  enabled: true
+  fullnameOverride: opencti-elasticsearch
+
+  ## Kernel settings modifier image
+  ##
+  sysctlImage:
+    ## @param sysctlImage.enabled Enable kernel settings modifier image
+    ##
+    enabled: false
+
+  # -- Elasticsearch cluster name
+  clusterName: elastic
+
+  extraEnvVars:
+    - name: ES_JAVA_OPTS
+      value: "-Xms128M -Xmx128M"
+
+
+  ## @section Master-elegible nodes parameters
+  master:
+    # -- Deploy the Elasticsearch master-elegible nodes as master-only nodes. Recommended for high-demand deployments.
+    masterOnly: true
+    # -- Number of master-elegible replicas to deploy
+    replicaCount: 1
+    # -- Enable persistence using Persistent Volume Claims
+    # ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    persistence:
+      # -- Enable persistence using a `PersistentVolumeClaim`
+      enabled: true
+      size: 1Gi
+      storageClass: "gp2"
+
+  # -- Data-only nodes parameters
+  data:
+    # -- Number of data-only replicas to deploy
+    replicaCount: 1
+
+    # -- Enable persistence using Persistent Volume Claims
+    # ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    persistence:
+      # -- Enable persistence using a `PersistentVolumeClaim`
+      enabled: true
+      size: 1Gi
+      storageClass: "gp2"
+
+  # -- Ingest-only nodes parameters
+  ingest:
+    # --  Enable ingest nodes
+    enabled: false
+
+  # -- Coordinating-only nodes parameters
+  coordinating:
+    # -- Number of coordinating-only replicas to deploy
+    replicaCount: 0
+
+# -- MinIO subchart deployment
+# ref: https://github.com/bitnami/charts/blob/main/bitnami/minio/values.yaml
+#
+minio:
+  # -- Enable or disable MinIO subchart
+  enabled: true
+  fullnameOverride: opencti-minio
+
+  # -- mode Minio server mode (`standalone` or `distributed`)
+  # ref: https://docs.minio.io/docs/distributed-minio-quickstart-guide
+  mode: standalone
+  # Minio authentication parameters
+  auth:
+    # -- Minio root username
+    rootUser: ChangeMe
+    # -- Password for Minio root user
+    rootPassword: ChangeMe
+
+  # -- Enable persistence using Persistent Volume Claims
+  # ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+  persistence:
+    # -- Enable MinIO data persistence using PVC. If false, use emptyDir
+    enabled: true
+    size: 1Gi
+    storageClass: "gp2"
+# -- RabbitMQ subchart deployment
+# ref: https://github.com/bitnami/charts/blob/main/bitnami/rabbitmq/values.yaml
+rabbitmq:
+    # -- Enable or disable RabbitMQ subchart
+  enabled: true
+  fullnameOverride: opencti-rabbitmq
+
+  # -- Number of RabbitMQ replicas to deploy
+  replicaCount: 1
+
+  # -- Clustering settings
+  clustering:
+    # -- Enable RabbitMQ clustering
+    enabled: false
+
+  # -- RabbitMQ Authentication parameters
+  auth:
+    # -- RabbitMQ application username
+    # ref: https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq#environment-variables
+    username: user
+    # -- RabbitMQ application password
+    # ref: https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq#environment-variables
+    password: ChangeMe
+    erlangCookie: ChangeMe
+
+  # -- Persistence parameters
+  persistence:
+    # -- Enable RabbitMQ data persistence using PVC
+    enabled: true
+    size: 1Gi
+    storageClass: "gp2"
+
+# -- Redis subchart deployment
+# ref: https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
+redis:
+  # -- Enable or disable Redis subchart
+  enabled: true
+  fullnameOverride: opencti-redis
+
+  # -- Redis architecture. Allowed values: `standalone` or `replication`
+  architecture: standalone
+  # -- Redis Authentication parameters
+  # ref: https://github.com/bitnami/containers/tree/main/bitnami/redis#setting-the-server-password-on-first-run
+  auth:
+    # -- Enable password authentication
+    enabled: false
+
+  # -- Redis master configuration parameters
+  master:
+    # -- Number of Redis master instances to deploy (experimental, requires additional configuration)
+    count: 1
+    # -- Persistence parameters
+    # ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    persistence:
+      # -- Enable persistence on Redis master nodes using Persistent Volume Claims
+      enabled: true
+      size: 1Gi
+      storageClass: "gp2"
+
+  # -- Redis replicas configuration parameters
+  replica:
+    # -- Number of Redis replicas to deploy
+    replicaCount: 1
+    # -- Persistence parameters
+    # ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    persistence:
+      # -- Enable persistence on Redis master nodes using Persistent Volume Claims
+      enabled: true
+      size: 1Gi
+      storageClass: "gp2"

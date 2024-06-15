@@ -1,0 +1,4 @@
+helm repo add devops-ia https://devops-ia.github.io/helm-charts
+Helm repo update
+helm install opencti
+helm install opencti devops-ia/opencti -f values.yaml
