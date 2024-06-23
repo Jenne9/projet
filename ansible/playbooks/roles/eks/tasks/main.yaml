@@ -138,6 +138,10 @@
         instance_types: ['t3.medium']
       register: nodegroup
 
+    - name: Active addon ebs
+      shell: |
+        eksctl create addon --name aws-ebs-csi-driver --cluster opencti-cluster --service-account-role-arn arn:aws:iam::730335433877:role/testeks --force
+
     - name: Pause for 3 minutes before configuring kubectl
       pause:
         minutes: 3

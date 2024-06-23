@@ -312,6 +312,7 @@ alertmanager:
   ##
   config:
     global:
+      slack_api_url: 'https://hooks.slack.com/services/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'
       resolve_timeout: 5m
     inhibit_rules:
       - source_matchers:
@@ -340,14 +341,18 @@ alertmanager:
       group_by: ['namespace']
       group_wait: 30s
       group_interval: 5m
-      repeat_interval: 12h
-      receiver: 'null'
+      repeat_interval: 3h
+      receiver: 'default-receiver'
       routes:
-      - receiver: 'null'
+      - receiver: 'default-receiver'
         matchers:
-          - alertname = "Watchdog"
+          - severity: warning
     receivers:
-    - name: 'null'
+    - name: 'slack'
+    - name: default-receiver
+      slack_configs:
+        - channel: '#general'
+          send_resolved: true
     templates:
     - '/etc/alertmanager/config/*.tmpl'
 
@@ -1028,17 +1033,17 @@ grafana:
     #   hosts:
     #   - grafana.example.com
 
-  # # To make Grafana persistent (Using Statefulset)
-  # #
-  # persistence:
-  #   enabled: true
-  #   type: sts
-  #   storageClassName: "storageClassName"
-  #   accessModes:
-  #     - ReadWriteOnce
-  #   size: 20Gi
-  #   finalizers:
-  #     - kubernetes.io/pvc-protection
+  # To make Grafana persistent (Using Statefulset)
+  #
+  persistence:
+    enabled: true
+    type: sts
+    storageClassName: "gp2"
+    accessModes:
+      - ReadWriteOnce
+    size: 1Gi
+    finalizers:
+      - kubernetes.io/pvc-protection
 
   serviceAccount:
     create: true
@@ -1140,6 +1145,9 @@ grafana:
   ##
   service:
     portName: http-web
+    type: ClusterIP
+    port: 80
+    targetPort: 3000
 
   serviceMonitor:
     # If true, a ServiceMonitor CRD is created for a prometheus operator
