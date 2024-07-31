@@ -312,7 +312,7 @@ alertmanager:
   ##
   config:
     global:
-      slack_api_url: 'https://hooks.slack.com/services/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'
+      slack_api_url: 'https://***.slack.com/***/***************'
       resolve_timeout: 5m
     inhibit_rules:
       - source_matchers:
