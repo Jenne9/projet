@@ -1,7 +1,7 @@
 ---
     - name: Copy values.yaml 
       copy:
-        src: /Users/macbookpro/Desktop/projet/ansible/playbooks/roles/monitoring/files/values.yaml
+        src: /ansible/playbooks/roles/monitoring/files/values.yaml
         dest: /tmp/values.yaml
       tags: helm
 
